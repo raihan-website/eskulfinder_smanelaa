@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eskul Finder - Temukan Eskulmu, Kembangkan Dirimu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        navy: {
+                            900: '#0F172A',
+                            800: '#1E293B',
+                            700: '#334155',
+                        },
+                        sky: {
+                            500: '#38BDF8',
+                            600: '#0284C7',
+                        },
+                        emerald: {
+                            500: '#22C55E',
+                        },
+                        orange: {
+                            500: '#F97316',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased pb-28 min-h-screen selection:bg-sky-500 selection:text-white">
+
+    <header class="sticky top-0 z-40 bg-navy-900 text-white shadow-md">
+        <div class="max-w-md mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-sky-500 text-navy-900 flex items-center justify-center font-extrabold text-lg shadow-md">
+                    <i class="fa-solid fa-compass"></i>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-base tracking-tight leading-none">Eskul Finder</h1>
+                    <span class="text-[10px] text-sky-400 font-medium">Temukan Eskulmu, Kembangkan Dirimu</span>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button onclick="toggleAdminMode()" id="roleBadge" class="px-2.5 py-1 rounded-full bg-slate-800 text-xs font-semibold text-sky-400 border border-slate-700 flex items-center gap-1.5 hover:bg-slate-700 transition">
+                    <i class="fa-solid fa-user-graduate"></i> <span id="roleBadgeText">Siswa</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-md mx-auto px-4 pt-4 min-h-[calc(100vh-8rem)]">
+
+        <!-- ================= PAGE 1: BERANDA ================= -->
+        <section id="page-home" class="space-y-6">
+            <!-- Greeting & Search Quick Bar -->
+            <div class="space-y-3">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-xs text-slate-500 font-medium">Halo,</p>
+                        <h2 class="text-xl font-extrabold text-navy-900" id="userGreetingName">Sebastian! 👋</h2>
+                    </div>
+                    <div class="w-10 h-10 rounded-full bg-sky-100 text-sky-600 flex items-center justify-center font-bold text-sm border-2 border-white shadow-sm">
+                        SB
+                    </div>
+                </div>
+                <div class="relative">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-slate-400 text-sm"></i>
+                    <input type="text" oninput="quickSearch(this.value)" placeholder="Cari ekstrakurikuler (misal: Basket, Seni)..." class="w-full pl-10 pr-4 py-3 rounded-2xl bg-white border border-slate-200 text-sm shadow-sm focus:outline-none focus:border-sky-500 transition">
+                </div>
+            </div>
+
+            <!-- Quiz Banner CTA -->
+            <div onclick="navigateTo('explore'); switchExploreTab('quiz');" class="bg-gradient-to-r from-navy-900 to-slate-800 text-white p-5 rounded-3xl shadow-lg relative overflow-hidden cursor-pointer hover:scale-[1.01] transition group">
+                <div class="absolute -right-4 -bottom-4 w-28 h-28 bg-sky-500/20 rounded-full blur-xl group-hover:bg-sky-500/30 transition"></div>
+                <div class="relative z-10 space-y-2">
+                    <span class="inline-block px-2.5 py-0.5 rounded-full bg-orange-500 text-[10px] font-bold uppercase tracking-wider text-white shadow-sm">Fitur Unggulan</span>
+                    <h3 class="font-extrabold text-lg">Bingung Pilih Eskul? 🎯</h3>
+                    <p class="text-xs text-slate-300">Ikuti Tes Minat Eskul singkat dan temukan kecocokan potensimu sekarang!</p>
+                    <div class="pt-1 flex items-center gap-1.5 text-sky-400 text-xs font-bold">
+                        <span>Mulai Tes Minat</span> <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Jadwal Kegiatan Hari Ini -->
+            <div class="space-y-3">
+                <div class="flex items-center justify-between">
+                    <h3 class="font-bold text-sm text-navy-900 flex items-center gap-2">
+                        <i class="fa-solid fa-calendar-day text-sky-500"></i> Jadwal Hari Ini
+                    </h3>
+                    <span class="text-xs text-slate-400 font-medium" id="currentDayLabel">Senin</span>
+                </div>
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center text-xl shadow-inner">
+                            🏀
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-sm text-navy-900">Basket Putra & Putri</h4>
+                            <p class="text-xs text-slate-500">Lapangan Sekolah • 15.30 - 17.00</p>
+                        </div>
+                    </div>
+                    <span class="px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-700 text-[10px] font-bold">Hari Ini</span>
+                </div>
+            </div>
+
+            <!-- Pengumuman Eskul -->
+            <div class="space-y-3">
+                <h3 class="font-bold text-sm text-navy-900 flex items-center gap-2">
+                    <i class="fa-solid fa-bullhorn text-orange-500"></i> Pengumuman Terbaru
+                </h3>
+                <div class="bg-orange-50 border border-orange-200 p-4 rounded-2xl space-y-1.5 shadow-sm">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-bold text-orange-600 bg-orange-100 px-2 py-0.5 rounded">Info Penting</span>
+                        <span class="text-[10px] text-slate-400">Hari ini</span>
+                    </div>
+                    <h4 class="font-bold text-sm text-navy-900">Seleksi Tim Basket Antar SMA</h4>
+                    <p class="text-xs text-slate-600 leading-relaxed">Seluruh anggota terdaftar diharap berkumpul di lapangan pukul 15.15 WIB mengenakan jersey latihan.</p>
+                </div>
+            </div>
+
+            <!-- Eskul Populer -->
+            <div class="space-y-3">
+                <div class="flex items-center justify-between">
+                    <h3 class="font-bold text-sm text-navy-900 flex items-center gap-2">
+                        <i class="fa-solid fa-star text-amber-500"></i> Eskul Populer
+                    </h3>
+                    <button onclick="navigateTo('explore')" class="text-xs font-bold text-sky-600 hover:underline">Lihat Semua</button>
+                </div>
+                <div class="grid grid-cols-2 gap-3" id="popularEskulGrid">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PAGE 2: CARI / EKSPLOR / TES MINAT ================= -->
+        <section id="page-explore" class="space-y-6 hidden">
+            <div class="space-y-2">
+                <h2 class="text-2xl font-extrabold text-navy-900">Eksplor & Tes Minat</h2>
+                <p class="text-xs text-slate-500">Temukan kegiatan yang tepat atau lakukan Tes Minat kilat.</p>
+            </div>
+
+            <!-- Action Tabs inside Explore -->
+            <div class="grid grid-cols-2 gap-2 p-1 bg-slate-200 rounded-2xl">
+                <button onclick="switchExploreTab('list')" id="tabBtnList" class="py-2.5 rounded-xl font-bold text-xs bg-white text-navy-900 shadow-sm transition">Daftar Eskul</button>
+                <button onclick="switchExploreTab('quiz')" id="tabBtnQuiz" class="py-2.5 rounded-xl font-bold text-xs text-slate-600 transition">Tes Minat 🎯</button>
+            </div>
+
+            <!-- Tab 1: Daftar Eskul -->
+            <div id="exploreListContainer" class="space-y-4">
+                <div class="flex gap-2 overflow-x-auto hide-scrollbar pb-1">
+                    <button onclick="filterCategory('all', this)" class="cat-btn px-3 py-1.5 rounded-xl bg-navy-900 text-white text-xs font-semibold whitespace-nowrap shadow-sm">Semua</button>
+                    <button onclick="filterCategory('Olahraga', this)" class="cat-btn px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-600 text-xs font-semibold whitespace-nowrap">⚽ Olahraga</button>
+                    <button onclick="filterCategory('Seni', this)" class="cat-btn px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-600 text-xs font-semibold whitespace-nowrap">🎨 Seni</button>
+                    <button onclick="filterCategory('Teknologi', this)" class="cat-btn px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-600 text-xs font-semibold whitespace-nowrap">💻 Teknologi</button>
+                    <button onclick="filterCategory('Musik', this)" class="cat-btn px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-600 text-xs font-semibold whitespace-nowrap">🎤 Musik</button>
+                    <button onclick="filterCategory('Sains', this)" class="cat-btn px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-600 text-xs font-semibold whitespace-nowrap">🔬 Sains</button>
+                </div>
+                <div class="space-y-3" id="fullEskulList">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+
+            <!-- Tab 2: Tes Minat Wizard -->
+            <div id="exploreQuizContainer" class="hidden space-y-4 bg-white p-5 rounded-3xl border border-slate-200 shadow-sm">
+                <div id="quizQuestionBox">
+                    <span class="text-[10px] font-bold text-sky-600 bg-sky-50 px-2.5 py-1 rounded-full uppercase" id="quizStepIndicator">Pertanyaan 1 dari 2</span>
+                    <h3 class="font-extrabold text-base text-navy-900 mt-3 mb-4" id="quizQuestionText">Apa aktivitas luar kelas yang paling kamu sukai saat luang?</h3>
+                    <div class="space-y-2.5" id="quizOptions">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+                <div id="quizResultBox" class="hidden space-y-4">
+                    <div class="text-center space-y-2">
+                        <div class="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-2xl mx-auto shadow-inner">
+                            🎉
+                        </div>
+                        <h3 class="font-extrabold text-lg text-navy-900">Hasil Analisis Minat Kamu!</h3>
+                        <p class="text-xs text-slate-500">Persentase di bawah adalah tingkat kecocokan berdasarkan jawabanmu:</p>
+                    </div>
+                    <div class="space-y-2.5" id="quizResultList">
+                        <!-- Populated -->
+                    </div>
+                    <button onclick="resetQuiz()" class="w-full py-3 rounded-xl bg-slate-100 text-navy-900 text-xs font-bold hover:bg-slate-200 transition">Ulangi Tes Minat</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PAGE 3: DETAIL EKSKUL ================= -->
+        <section id="page-detail" class="space-y-6 hidden">
+            <button onclick="navigateTo('explore')" class="inline-flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-navy-900 transition">
+                <i class="fa-solid fa-arrow-left"></i> Kembali ke Daftar
+            </button>
+            <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-5" id="detailContent">
+                <!-- Populated dynamically -->
+            </div>
+        </section>
+
+        <!-- ================= PAGE 4: PENDAFTARAN ================= -->
+        <section id="page-register" class="space-y-6 hidden">
+            <button onclick="navigateTo('detail')" class="inline-flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-navy-900 transition">
+                <i class="fa-solid fa-arrow-left"></i> Kembali
+            </button>
+            <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-5">
+                <div>
+                    <span class="text-[10px] font-bold text-sky-600 bg-sky-50 px-2.5 py-1 rounded-full uppercase">Formulir Resmi</span>
+                    <h2 class="text-xl font-extrabold text-navy-900 mt-2">Daftar Ekstrakurikuler</h2>
+                    <p class="text-xs text-slate-500">Pastikan data dirimu sudah benar sebelum mengirimkan pendaftaran.</p>
+                </div>
+                <form onsubmit="submitRegistration(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Nama Lengkap</label>
+                        <input type="text" id="regName" value="Sebastian" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs bg-slate-50 font-semibold focus:outline-none focus:border-sky-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Kelas</label>
+                        <input type="text" id="regClass" value="XII IPA 1" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs bg-slate-50 font-semibold focus:outline-none focus:border-sky-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Pilihan Eskul</label>
+                        <input type="text" id="regEskulName" readonly class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs bg-slate-100 font-bold text-navy-900">
+                    </div>
+                    <div class="flex items-start gap-3 pt-2">
+                        <input type="checkbox" id="regAgree" required class="mt-0.5 rounded text-sky-500 focus:ring-sky-500 w-4 h-4">
+                        <label for="regAgree" class="text-xs text-slate-600 leading-relaxed">Saya bersedia mengikuti seluruh rangkaian kegiatan ekstrakurikuler ini secara aktif sesuai jadwal sekolah.</label>
+                    </div>
+                    <button type="submit" class="w-full py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs shadow-lg shadow-emerald-500/20 transition">
+                        DAFTAR SEKARANG
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- ================= PAGE 5: JADWAL KALENDER & PENGINGAT ================= -->
+        <section id="page-schedule" class="space-y-6 hidden">
+            <div class="space-y-2">
+                <h2 class="text-2xl font-extrabold text-navy-900">Jadwal & Pengingat</h2>
+                <p class="text-xs text-slate-500">Kalender kegiatan mingguan seluruh ekstrakurikuler sekolah.</p>
+            </div>
+
+            <div class="space-y-3" id="scheduleListContainer">
+                <!-- Populated dynamically -->
+            </div>
+        </section>
+
+        <!-- ================= PAGE 6: PROFIL / ADMIN DASHBOARD ================= -->
+        <section id="page-profile" class="space-y-6 hidden">
+            <!-- Student Profile view -->
+            <div id="studentProfileView" class="space-y-6">
+                <div class="bg-navy-900 text-white p-6 rounded-3xl shadow-lg space-y-4 relative overflow-hidden">
+                    <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-sky-500/10 rounded-full blur-xl"></div>
+                    <div class="flex items-center space-x-4 relative z-10">
+                        <div class="w-16 h-16 rounded-2xl bg-sky-500 text-navy-900 flex items-center justify-center font-extrabold text-2xl shadow">
+                            SB
+                        </div>
+                        <div>
+                            <h3 class="font-extrabold text-lg">Sebastian</h3>
+                            <p class="text-xs text-sky-400">Kelas XII IPA 1 • NISN: 00682194</p>
+                            <span class="inline-block mt-2 px-2.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[10px] font-bold">Status: Siswa Aktif</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+                    <h3 class="font-bold text-sm text-navy-900 flex items-center gap-2">
+                        <i class="fa-solid fa-bookmark text-sky-500"></i> Eskul yang Diikuti
+                    </h3>
+                    <div id="myEskulContainer" class="space-y-2">
+                        <!-- Populated -->
+                    </div>
+                </div>
+
+                <button onclick="toggleAdminMode()" class="w-full py-3.5 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition shadow-sm flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-user-gear"></i> Masuk Dashboard Admin (Guru)
+                </button>
+            </div>
+
+            <!-- Admin Dashboard View -->
+            <div id="adminDashboardView" class="hidden space-y-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <span class="text-[10px] font-bold text-orange-600 bg-orange-50 px-2.5 py-0.5 rounded">Panel Pembina</span>
+                        <h2 class="text-xl font-extrabold text-navy-900 mt-1">Dashboard Admin</h2>
+                    </div>
+                    <button onclick="toggleAdminMode()" class="px-3 py-1.5 rounded-xl bg-slate-200 text-slate-700 text-xs font-bold hover:bg-slate-300 transition">Keluar Admin</button>
+                </div>
+
+                <!-- Admin Quick Stats -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-1">
+                        <div class="text-xs text-slate-400 font-medium">Total Eskul</div>
+                        <div class="text-2xl font-extrabold text-navy-900" id="adminTotalEskul">6</div>
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-1">
+                        <div class="text-xs text-slate-400 font-medium">Total Pendaftar</div>
+                        <div class="text-2xl font-extrabold text-navy-900" id="adminTotalMembers">32</div>
+                    </div>
+                </div>
+
+                <!-- Admin Actions -->
+                <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-bold text-sm text-navy-900">Kelola Ekstrakurikuler</h3>
+                        <button onclick="openAddEskulModal()" class="px-3 py-1.5 rounded-xl bg-sky-500 text-white text-xs font-bold shadow-sm hover:bg-sky-600 transition flex items-center gap-1">
+                            <i class="fa-solid fa-plus text-[10px]"></i> Tambah
+                        </button>
+                    </div>
+                    <div class="space-y-2.5" id="adminEskulList">
+                        <!-- Populated -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Success Modal Toast -->
+    <div id="successModal" class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm p-6 rounded-3xl shadow-2xl text-center space-y-4 animate-in fade-in zoom-in duration-200">
+            <div class="w-16 h-16 rounded-full bg-emerald-100 text-emerald-500 flex items-center justify-center text-3xl mx-auto shadow-inner">
+                <i class="fa-solid fa-check"></i>
+            </div>
+            <div class="space-y-1">
+                <h3 class="font-extrabold text-lg text-navy-900">Pendaftaran Berhasil!</h3>
+                <p class="text-xs text-slate-500" id="successModalText">Kamu telah terdaftar di ekstrakurikuler.</p>
+            </div>
+            <button onclick="closeSuccessModal()" class="w-full py-3 rounded-xl bg-navy-900 text-white text-xs font-bold hover:bg-slate-800 transition shadow">
+                Kembali ke Beranda
+            </button>
+        </div>
+    </div>
+
+    <!-- Admin Add/Edit Modal -->
+    <div id="adminModal" class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md p-6 rounded-3xl shadow-2xl space-y-4">
+            <h3 class="font-extrabold text-base text-navy-900" id="adminModalTitle">Tambah Ekstrakurikuler Baru</h3>
+            <form onsubmit="saveAdminEskul(event)" class="space-y-3">
+                <input type="hidden" id="editEskulId">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Nama Eskul</label>
+                    <input type="text" id="adminName" required placeholder="Contoh: English Club" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-sky-500">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Kategori</label>
+                    <select id="adminCategory" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs bg-white focus:outline-none focus:border-sky-500">
+                        <option value="Olahraga">Olahraga</option>
+                        <option value="Seni">Seni</option>
+                        <option value="Teknologi">Teknologi</option>
+                        <option value="Musik">Musik</option>
+                        <option value="Sains">Sains</option>
+                        <option value="Akademik">Akademik</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Hari</label>
+                        <input type="text" id="adminSchedule" placeholder="Senin & Kamis" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-sky-500">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Jam</label>
+                        <input type="text" id="adminTime" placeholder="15.30 - 17.00" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-sky-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Lokasi / Tempat</label>
+                    <input type="text" id="adminLocation" placeholder="Lapangan Basket" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-sky-500">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Deskripsi Singkat</label>
+                    <textarea id="adminDesc" rows="2" required placeholder="Deskripsi ekstrakurikuler..." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-sky-500"></textarea>
+                </div>
+                <div class="flex gap-2 pt-2">
+                    <button type="button" onclick="closeAdminModal()" class="flex-1 py-3 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold hover:bg-slate-200 transition">Batal</button>
+                    <button type="submit" class="flex-1 py-3 rounded-xl bg-sky-500 text-white text-xs font-bold hover:bg-sky-600 transition shadow">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 shadow-lg">
+        <div class="max-w-md mx-auto px-4 h-16 flex items-center justify-around text-slate-400">
+            <button onclick="navigateTo('home')" id="nav-home" class="flex flex-col items-center space-y-1 text-sky-600 transition">
+                <i class="fa-solid fa-house text-lg"></i>
+                <span class="text-[10px] font-bold">Home</span>
+            </button>
+            <button onclick="navigateTo('explore')" id="nav-explore" class="flex flex-col items-center space-y-1 hover:text-sky-600 transition">
+                <i class="fa-solid fa-compass text-lg"></i>
+                <span class="text-[10px] font-medium">Cari</span>
+            </button>
+            <button onclick="navigateTo('schedule')" id="nav-schedule" class="flex flex-col items-center space-y-1 hover:text-sky-600 transition">
+                <i class="fa-solid fa-calendar-days text-lg"></i>
+                <span class="text-[10px] font-medium">Jadwal</span>
+            </button>
+            <button onclick="navigateTo('profile')" id="nav-profile" class="flex flex-col items-center space-y-1 hover:text-sky-600 transition">
+                <i class="fa-solid fa-user text-lg"></i>
+                <span class="text-[10px] font-medium">Profil</span>
+            </button>
+        </div>
+    </nav>
+
+    <script>
+        // Database State
+        let eskulData = [
+            { id: 1, name: 'Basket', category: 'Olahraga', icon: '🏀', desc: 'Olahraga tim yang melatih kerja sama, koordinasi, dan keterampilan bermain basket secara profesional.', schedule: 'Senin & Kamis', time: '15.30 - 17.00', location: 'Lapangan Sekolah', coach: 'Guru Olahraga', members: 25, quota: '25/30', popular: true, activities: ['Latihan teknik dasar & dribbling', 'Sparring antarkelas', 'Turnamen persahabatan SMA'] },
+            { id: 2, name: 'Seni Rupa & Kriya', category: 'Seni', icon: '🎨', desc: 'Mengembangkan kreativitas visual melalui lukisan, kriya, desain grafis, dan seni kontemporer.', schedule: 'Selasa', time: '15.30 - 17.00', location: 'Studio Seni', coach: 'Ibu Siska, S.Pd', members: 18, quota: '18/25', popular: true, activities: ['Sketching & Lukis Kanvas', 'Pameran Seni Sekolah', 'Desain Poster Digital'] },
+            { id: 3, name: 'IT Club', category: 'Teknologi', icon: '💻', desc: 'Belajar dasar pemrograman web, algoritma, perakitan perangkat, dan pembuatan aplikasi cerdas.', schedule: 'Rabu', time: '15.30 - 17.00', location: 'Laboratorium Komputer', coach: 'Pak Hendra, M.Kom', members: 22, quota: '22/30', popular: true, activities: ['Coding dasar HTML & JavaScript', 'Membuat game sederhana', 'Workshop IoT dasar'] },
+            { id: 4, name: 'Paduan Suara', category: 'Musik', icon: '🎤', desc: 'Mengasah olah vokal, harmoni suara, pernapasan, dan tampil dalam acara resmi sekolah.', schedule: 'Jumat', time: '14.30 - 16.00', location: 'Ruang Musik', coach: 'Ibu Laras', members: 20, quota: '20/25', popular: true, activities: ['Latihan vokal grup', 'Paduan suara upacara bendera', 'Konser mini akhir semester'] },
+            { id: 5, name: 'Futsal', category: 'Olahraga', icon: '⚽', desc: 'Sepak bola indoor yang mengutamakan kecepatan reaksi, taktik menyerang, dan fisik prima.', schedule: 'Selasa & Kamis', time: '15.30 - 17.00', location: 'GOR Indoor', coach: 'Coach Budi', members: 28, quota: '28/30', popular: false, activities: ['Latihan fisik & passing', 'Taktik formasi bertahan', 'Liga Futsal Antar Angkatan'] },
+            { id: 6, name: 'Karya Ilmiah Remaja', category: 'Sains', icon: '🔬', desc: 'Melakukan eksperimen sains, penelitian alam, dan inovasi teknologi tepat guna berbasis riset.', schedule: 'Kamis', time: '15.30 - 17.00', location: 'Laboratorium Biologi', coach: 'Dr. Anita', members: 15, quota: '15/20', popular: false, activities: ['Eksperimen kimia sederhana', 'Penulisan karya tulis ilmiah', 'Olimpiade Sains Nasional'] }
+        ];
+
+        let myRegisteredEskul = ['Basket'];
+        let currentSelectedEskulId = null;
+        let quizStep = 1;
+        let selectedInterest = '';
+
+        window.onload = function() {
+            renderViews();
+            setupQuizQuestion(1);
+        }
+
+        // Navigation Controller
+        function navigateTo(pageId) {
+            document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
+            document.getElementById(`page-${pageId}`).classList.remove('hidden');
+
+            document.querySelectorAll('nav button').forEach(btn => {
+                btn.classList.remove('text-sky-600');
+                btn.classList.add('text-slate-400');
+                const span = btn.querySelector('span');
+                if(span) span.classList.remove('font-bold');
+            });
+            
+            const activeBtn = document.getElementById(`nav-${pageId === 'detail' || pageId === 'register' ? 'explore' : pageId}`);
+            if(activeBtn) {
+                activeBtn.classList.remove('text-slate-400');
+                activeBtn.classList.add('text-sky-600');
+                const span = activeBtn.querySelector('span');
+                if(span) span.classList.add('font-bold');
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            renderViews();
+        }
+
+        function renderViews() {
+            renderPopularEskul();
+            renderExploreList();
+            renderScheduleList();
+            renderProfileView();
+            renderAdminList();
+        }
+
+        // Home Popular Eskul
+        function renderPopularEskul() {
+            const container = document.getElementById('popularEskulGrid');
+            container.innerHTML = '';
+            eskulData.filter(e => e.popular).forEach(e => {
+                container.innerHTML += `
+                    <div onclick="openDetail(${e.id})" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm cursor-pointer hover:border-sky-500 transition group space-y-2">
+                        <div class="text-2xl">${e.icon}</div>
+                        <div>
+                            <h4 class="font-bold text-sm text-navy-900 group-hover:text-sky-600 transition truncate">${e.name}</h4>
+                            <p class="text-[11px] text-slate-500">${e.category}</p>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // Explore Directory
+        function renderExploreList(filter = 'all', query = '') {
+            const container = document.getElementById('fullEskulList');
+            container.innerHTML = '';
+            let filtered = eskulData;
+            if(filter !== 'all') filtered = filtered.filter(e => e.category === filter);
+            if(query) filtered = filtered.filter(e => e.name.toLowerCase().includes(query.toLowerCase()) || e.desc.toLowerCase().includes(query.toLowerCase()));
+
+            if(filtered.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-400 text-center py-6">Tidak ditemukan ekstrakurikuler yang sesuai.</p>`;
+                return;
+            }
+
+            filtered.forEach(e => {
+                container.innerHTML += `
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                        <div class="flex items-center space-x-3.5">
+                            <div class="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-xl shadow-inner">
+                                ${e.icon}
+                            </div>
+                            <div>
+                                <span class="text-[10px] font-bold text-sky-600 uppercase tracking-wider">${e.category}</span>
+                                <h4 class="font-bold text-sm text-navy-900">${e.name}</h4>
+                                <p class="text-[11px] text-slate-500">${e.schedule} • ${e.location}</p>
+                            </div>
+                        </div>
+                        <button onclick="openDetail(${e.id})" class="px-3.5 py-2 rounded-xl bg-sky-50 text-sky-600 font-bold text-xs hover:bg-sky-500 hover:text-white transition shadow-sm">
+                            Detail
+                        </button>
+                    </div>
+                `;
+            });
+        }
+
+        function filterCategory(cat, btnEl) {
+            document.querySelectorAll('.cat-btn').forEach(b => {
+                b.classList.remove('bg-navy-900', 'text-white');
+                b.classList.add('bg-white', 'border', 'border-slate-200', 'text-slate-600');
+            });
+            if(btnEl) {
+                btnEl.classList.add('bg-navy-900', 'text-white');
+                btnEl.classList.remove('bg-white', 'border', 'border-slate-200', 'text-slate-600');
+            }
+            renderExploreList(cat);
+        }
+
+        function quickSearch(query) {
+            navigateTo('explore');
+            switchExploreTab('list');
+            renderExploreList('all', query);
+        }
+
+        // Explore Tabs
+        function switchExploreTab(tab) {
+            const listBtn = document.getElementById('tabBtnList');
+            const quizBtn = document.getElementById('tabBtnQuiz');
+            const listContainer = document.getElementById('exploreListContainer');
+            const quizContainer = document.getElementById('exploreQuizContainer');
+
+            if(tab === 'list') {
+                listBtn.className = 'py-2.5 rounded-xl font-bold text-xs bg-white text-navy-900 shadow-sm transition';
+                quizBtn.className = 'py-2.5 rounded-xl font-bold text-xs text-slate-600 transition';
+                listContainer.classList.remove('hidden');
+                quizContainer.classList.add('hidden');
+            } else {
+                quizBtn.className = 'py-2.5 rounded-xl font-bold text-xs bg-white text-navy-900 shadow-sm transition';
+                listBtn.className = 'py-2.5 rounded-xl font-bold text-xs text-slate-600 transition';
+                quizContainer.classList.remove('hidden');
+                listContainer.classList.add('hidden');
+            }
+        }
+
+        // Quiz Logic
+        function setupQuizQuestion(step) {
+            quizStep = step;
+            const titleEl = document.getElementById('quizQuestionText');
+            const indicatorEl = document.getElementById('quizStepIndicator');
+            const optionsEl = document.getElementById('quizOptions');
+
+            if(step === 1) {
+                indicatorEl.innerText = "Pertanyaan 1 dari 2";
+                titleEl.innerText = "Apa aktivitas luar kelas yang paling kamu sukai saat luang?";
+                optionsEl.innerHTML = `
+                    <button onclick="answerQuizStep1('Olahraga')" class="w-full text-left p-3.5 rounded-xl border border-slate-200 hover:border-sky-500 hover:bg-sky-50/50 text-xs font-semibold transition">⚽ Berolahraga, tanding fisik, dan menjaga kebugaran tubuh.</button>
+                    <button onclick="answerQuizStep1('Seni')" class="w-full text-left p-3.5 rounded-xl border border-slate-200 hover:border-sky-500 hover:bg-sky-50/50 text-xs font-semibold transition">🎨 Menggambar, mendesain, melukis, atau seni visual.</button>
+                    <button onclick="answerQuizStep1('Teknologi')" class="w-full text-left p-3.5 rounded-xl border border-slate-200 hover:border-sky-500 hover:bg-sky-50/50 text-xs font-semibold transition">💻 Ngoding, merakit komputer, atau membuat konten digital.</button>
+                    <button onclick="answerQuizStep1('Musik')" class="w-full text-left p-3.5 rounded-xl border border-slate-200 hover:border-sky-500 hover:bg-sky-50/50 text-xs font-semibold transition">🎤 Bernyanyi, bermain alat musik, atau paduan suara.</button>
+                    <button onclick="answerQuizStep1('Sains')" class="w-full text-left p-3.5 rounded-xl border border-slate-200 hover:border-sky-500 hover:bg-sky-50/50 text-xs font-semibold transition">🔬 Eksperimen laboratorium dan riset ilmiah.</button>
+                `;
+            } else {
+                indicatorEl.innerText = "Pertanyaan 2 dari 2";
+                titleEl.innerText = "Apa tujuan utama kamu mengikuti ekstrakurikuler?";
+                optionsEl.innerHTML = `
+                    <button onclick="finishQuiz('${selectedInterest}')" class="w-full text-left p-3.5 rounded-xl border border-slate-200 hover:border-sky-500 hover:bg-sky-50/50 text-xs font-semibold transition">🏆 Mengembangkan prestasi dan mengikuti kompetisi.</button>
+                    <button onclick="finishQuiz('${selectedInterest}')" class="w-full text-left p-3.5 rounded-xl border border-slate-200 hover:border-sky-500 hover:bg-sky-50/50 text-xs font-semibold transition">🤝 Menambah relasi, teman, dan melatih kerja sama tim.</button>
+                    <button onclick="finishQuiz('${selectedInterest}')" class="w-full text-left p-3.5 rounded-xl border border-slate-200 hover:border-sky-500 hover:bg-sky-50/50 text-xs font-semibold transition">💡 Menggali hobi baru dan menyalurkan kreativitas.</button>
+                `;
+            }
+        }
+
+        function answerQuizStep1(category) {
+            selectedInterest = category;
+            setupQuizQuestion(2);
+        }
+
+        function finishQuiz(category) {
+            document.getElementById('quizQuestionBox').classList.add('hidden');
+            const resBox = document.getElementById('quizResultBox');
+            resBox.classList.remove('hidden');
+
+            const resList = document.getElementById('quizResultList');
+            resList.innerHTML = '';
+            
+            // Find matches based on category
+            let matchedItems = eskulData.filter(e => e.category === category);
+            if(matchedItems.length === 0) matchedItems = eskulData.slice(0, 3);
+            
+            let percentages = [92, 86, 79];
+            matchedItems.slice(0, 3).forEach((item, index) => {
+                resList.innerHTML += `
+                    <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-xl">${item.icon}</span>
+                            <div>
+                                <h4 class="font-bold text-xs text-navy-900">${item.name}</h4>
+                                <p class="text-[10px] text-slate-500">${item.category}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-700 font-extrabold text-xs">${percentages[index]}% cocok</span>
+                            <button onclick="openDetail(${item.id})" class="px-2.5 py-1 bg-sky-500 text-white rounded-lg text-xs font-bold shadow-sm">Lihat</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function resetQuiz() {
+            selectedInterest = '';
+            document.getElementById('quizResultBox').classList.add('hidden');
+            document.getElementById('quizQuestionBox').classList.remove('hidden');
+            setupQuizQuestion(1);
+        }
+
+        // Detail View
+        function openDetail(id) {
+            currentSelectedEskulId = id;
+            const e = eskulData.find(item => item.id === id);
+            if(!e) return;
+
+            navigateTo('detail');
+            const container = document.getElementById('detailContent');
+            
+            let activitiesHtml = e.activities ? e.activities.map(act => `<li class="flex items-center gap-2 text-xs text-slate-600"><i class="fa-solid fa-check text-emerald-500 text-[10px]"></i> ${act}</li>`).join('') : '';
+
+            container.innerHTML = `
+                <div class="flex items-center space-x-4">
+                    <div class="w-16 h-16 rounded-2xl bg-sky-100 text-sky-600 flex items-center justify-center text-3xl shadow-sm">
+                        ${e.icon}
+                    </div>
+                    <div>
+                        <span class="text-[10px] font-bold text-sky-600 uppercase tracking-wider">${e.category}</span>
+                        <h2 class="text-xl font-extrabold text-navy-900">${e.name}</h2>
+                        <p class="text-xs text-slate-500">Pembina: ${e.coach}</p>
+                    </div>
+                </div>
+
+                <div class="space-y-2 pt-2 border-t border-slate-100">
+                    <h4 class="font-bold text-xs text-navy-900 uppercase tracking-wide">Tentang</h4>
+                    <p class="text-xs text-slate-600 leading-relaxed">${e.desc}</p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 pt-2">
+                    <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase">Jadwal</span>
+                        <h4 class="font-bold text-xs text-navy-900 mt-0.5">${e.schedule}</h4>
+                        <p class="text-[11px] text-slate-500">${e.time}</p>
+                    </div>
+                    <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase">Lokasi</span>
+                        <h4 class="font-bold text-xs text-navy-900 mt-0.5">${e.location}</h4>
+                        <p class="text-[11px] text-slate-500">Area Sekolah</p>
+                    </div>
+                </div>
+
+                <div class="space-y-2 pt-2">
+                    <h4 class="font-bold text-xs text-navy-900 uppercase tracking-wide">Kegiatan Rutin</h4>
+                    <ul class="space-y-1.5 bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
+                        ${activitiesHtml}
+                    </ul>
+                </div>
+
+                <div class="flex items-center justify-between pt-2">
+                    <div>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase">Kuota Anggota</span>
+                        <h4 class="font-bold text-sm text-navy-900">${e.quota} siswa</h4>
+                    </div>
+                    <button onclick="goToRegister(${e.id})" class="px-6 py-3 rounded-xl bg-sky-500 hover:bg-sky-600 text-white font-bold text-xs shadow-lg shadow-sky-500/20 transition flex items-center gap-2">
+                        <span>Daftar Eskul</span> <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                    </button>
+                </div>
+            `;
+        }
+
+        function goToRegister(id) {
+            const e = eskulData.find(item => item.id === id);
+            if(!e) return;
+            navigateTo('register');
+            document.getElementById('regEskulName').value = e.name;
+        }
+
+        // Registration Flow
+        function submitRegistration(event) {
+            event.preventDefault();
+            const eskulName = document.getElementById('regEskulName').value;
+            if(!myRegisteredEskul.includes(eskulName)) {
+                myRegisteredEskul.push(eskulName);
+            }
+            document.getElementById('successModalText').innerText = `Kamu telah berhasil terdaftar di ${eskulName}.`;
+            document.getElementById('successModal').classList.remove('hidden');
+        }
+
+        function closeSuccessModal() {
+            document.getElementById('successModal').classList.add('hidden');
+            navigateTo('home');
+        }
+
+        // Schedule View
+        function renderScheduleList() {
+            const container = document.getElementById('scheduleListContainer');
+            container.innerHTML = '';
+
+            let days = [
+                { day: 'Senin', eskul: 'Basket', time: '15.30 WIB', icon: '🏀', location: 'Lapangan Sekolah' },
+                { day: 'Selasa', eskul: 'Seni Rupa & Kriya', time: '15.30 WIB', icon: '🎨', location: 'Studio Seni' },
+                { day: 'Rabu', eskul: 'IT Club', time: '15.30 WIB', icon: '💻', location: 'Lab Komputer' },
+                { day: 'Kamis', eskul: 'Basket & Futsal', time: '15.30 WIB', icon: '🏀', location: 'Lapangan / GOR' },
+                { day: 'Jumat', eskul: 'Paduan Suara', time: '14.30 WIB', icon: '🎤', location: 'Ruang Musik' }
+            ];
+
+            days.forEach(d => {
+                container.innerHTML += `
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                        <div class="flex items-center space-x-3.5">
+                            <div class="w-12 h-12 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center text-xl shadow-inner font-bold">
+                                ${d.icon}
+                            </div>
+                            <div>
+                                <span class="text-[10px] font-extrabold text-sky-600 bg-sky-50 px-2 py-0.5 rounded">${d.day}</span>
+                                <h4 class="font-bold text-sm text-navy-900 mt-1">${d.eskul}</h4>
+                                <p class="text-[11px] text-slate-500">${d.location} • ${d.time}</p>
+                            </div>
+                        </div>
+                        <span class="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-600 text-[10px] font-bold border border-emerald-200">Pengingat Aktif</span>
+                    </div>
+                `;
+            });
+        }
+
+        // Profile View
+        function renderProfileView() {
+            const container = document.getElementById('myEskulContainer');
+            container.innerHTML = '';
+            if(myRegisteredEskul.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-400">Kamu belum mendaftar eskul apa pun.</p>`;
+                return;
+            }
+
+            myRegisteredEskul.forEach(name => {
+                container.innerHTML += `
+                    <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-xl bg-sky-500 text-white flex items-center justify-center font-bold text-sm">
+                                🏅
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-xs text-navy-900">${name}</h4>
+                                <p class="text-[10px] text-emerald-600 font-semibold">Anggota Terdaftar</p>
+                            </div>
+                        </div>
+                        <span class="text-xs text-slate-400"><i class="fa-solid fa-circle-check text-emerald-500"></i> Aktif</span>
+                    </div>
+                `;
+            });
+        }
+
+        // Admin Mode Toggle
+        function toggleAdminMode() {
+            isAdmin = !isAdmin;
+            const studentView = document.getElementById('studentProfileView');
+            const adminView = document.getElementById('adminDashboardView');
+            const badgeText = document.getElementById('roleBadgeText');
+
+            if(isAdmin) {
+                studentView.classList.add('hidden');
+                adminView.classList.remove('hidden');
+                badgeText.innerText = 'Admin / Guru';
+            } else {
+                adminView.classList.add('hidden');
+                studentView.classList.remove('hidden');
+                badgeText.innerText = 'Siswa';
+            }
+        }
+
+        function renderAdminList() {
+            document.getElementById('adminTotalEskul').innerText = eskulData.length;
+            document.getElementById('adminTotalMembers').innerText = eskulData.reduce((acc, curr) => acc + curr.members, 0);
+
+            const container = document.getElementById('adminEskulList');
+            container.innerHTML = '';
+
+            eskulData.forEach(e => {
+                container.innerHTML += `
+                    <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-xl">${e.icon}</span>
+                            <div>
+                                <h4 class="font-bold text-xs text-navy-900">${e.name}</h4>
+                                <p class="text-[10px] text-slate-500">${e.schedule} • ${e.members} Anggota</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <button onclick="openEditEskulModal(${e.id})" class="px-2.5 py-1 bg-sky-100 text-sky-700 rounded-lg text-[10px] font-bold"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="deleteEskul(${e.id})" class="px-2.5 py-1 bg-rose-100 text-rose-700 rounded-lg text-[10px] font-bold"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function openAddEskulModal() {
+            document.getElementById('adminModalTitle').innerText = 'Tambah Ekstrakurikuler Baru';
+            document.getElementById('editEskulId').value = '';
+            document.getElementById('adminName').value = '';
+            document.getElementById('adminSchedule').value = '';
+            document.getElementById('adminTime').value = '';
+            document.getElementById('adminLocation').value = '';
+            document.getElementById('adminDesc').value = '';
+            document.getElementById('adminModal').classList.remove('hidden');
+        }
+
+        function openEditEskulModal(id) {
+            const e = eskulData.find(item => item.id === id);
+            if(!e) return;
+            document.getElementById('adminModalTitle').innerText = 'Edit Ekstrakurikuler';
+            document.getElementById('editEskulId').value = e.id;
+            document.getElementById('adminName').value = e.name;
+            document.getElementById('adminCategory').value = e.category;
+            document.getElementById('adminSchedule').value = e.schedule;
+            document.getElementById('adminTime').value = e.time;
+            document.getElementById('adminLocation').value = e.location;
+            document.getElementById('adminDesc').value = e.desc;
+            document.getElementById('adminModal').classList.remove('hidden');
+        }
+
+        function closeAdminModal() {
+            document.getElementById('adminModal').classList.add('hidden');
+        }
+
+        function saveAdminEskul(event) {
+            event.preventDefault();
+            const id = document.getElementById('editEskulId').value;
+            const name = document.getElementById('adminName').value;
+            const category = document.getElementById('adminCategory').value;
+            const schedule = document.getElementById('adminSchedule').value;
+            const time = document.getElementById('adminTime').value;
+            const location = document.getElementById('adminLocation').value;
+            const desc = document.getElementById('adminDesc').value;
+
+            if(id) {
+                let e = eskulData.find(item => item.id == id);
+                if(e) {
+                    e.name = name;
+                    e.category = category;
+                    e.schedule = schedule;
+                    e.time = time;
+                    e.location = location;
+                    e.desc = desc;
+                }
+            } else {
+                let newId = eskulData.length > 0 ? Math.max(...eskulData.map(i => i.id)) + 1 : 1;
+                eskulData.push({
+                    id: newId,
+                    name: name,
+                    category: category,
+                    icon: '⭐',
+                    desc: desc,
+                    schedule: schedule,
+                    time: time,
+                    location: location,
+                    coach: 'Pembina Sekolah',
+                    members: 5,
+                    quota: '5/25',
+                    popular: false,
+                    activities: ['Latihan rutin', 'Pengenalan dasar']
+                });
+            }
+
+            closeAdminModal();
+            renderViews();
+        }
+
+        function deleteEskul(id) {
+            eskulData = eskulData.filter(item => item.id !== id);
+            renderViews();
+        }
+    </script>
+</body>
+</html>
